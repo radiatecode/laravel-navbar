@@ -1,0 +1,51 @@
+{
+    "name": "radiatecode/laravel-navbar",
+    "description": "Laravel package to generate menus",
+    "keywords": [
+        "laravel-menus",
+        "laravel-menu",
+        "laravel-site-menu",
+        "laravel-navbar",
+        "laravel-navigation"
+    ],
+    "type": "library",
+    "authors": [
+        {
+            "name": "radiatecode",
+            "email": "radiate126@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1|^8.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.18",
+        "phpunit/phpunit": "^9.5"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "RadiateCode\\LaravelNavbar\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "RadiateCode\\LaravelNavbar\\tests\\" : "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers" : [
+                "RadiateCode\\LaravelNavbar\\NavbarServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev"
+}
