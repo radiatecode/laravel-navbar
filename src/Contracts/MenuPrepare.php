@@ -6,7 +6,7 @@ namespace RadiateCode\LaravelNavbar\Contracts;
 
 interface MenuPrepare
 {
-    public function getMenu(): string;
+    public function getMenu(): array;
 
     public function getParent(): string;
 

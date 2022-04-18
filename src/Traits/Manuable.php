@@ -1,13 +1,13 @@
 <?php
 
 
-namespace App\Traits;
+namespace RadiateCode\LaravelNavbar\Traits;
 
 
 use Exception;
 use RadiateCode\LaravelNavbar\MenuPrepare;
 
-trait HasMenu
+trait Manuable
 {
     /**
      * @var MenuPrepare $menu

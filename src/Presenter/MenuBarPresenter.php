@@ -4,7 +4,9 @@
 namespace RadiateCode\LaravelNavbar\Presenter;
 
 
-class MenuBarPresenter
+use RadiateCode\LaravelNavbar\Contracts\Presenter;
+
+class MenuBarPresenter implements Presenter
 {
     public function openNavTag(string $class = null, array $attributes = []): string
     {
@@ -16,8 +18,8 @@ class MenuBarPresenter
         return PHP_EOL . '</nav>' . PHP_EOL;
     }
 
-    public function openNavULTag(string $class = null, array $attributes = []
-    ): string {
+    public function openNavULTag(string $class = null, array $attributes = []): string
+    {
         return PHP_EOL
             . '<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">'
             . PHP_EOL;
@@ -51,9 +53,12 @@ class MenuBarPresenter
         return $this->navWithNoChildren($menu);
     }
 
-    private function navWithNoChildren($menu): string
+    protected function navWithNoChildren($menu): string
     {
-        return '<li class="nav-item has-treeview">
+        $menuLinks = $menu['nav-links'];
+
+        if (count($menuLinks) > 1){
+            return '<li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="nav-icon ' . $menu['icon'] . '"></i>
                         <p>
@@ -62,12 +67,19 @@ class MenuBarPresenter
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                       ' . $this->navLink($menu['nav-links']) . '
+                       ' . $this->navLink($menuLinks) . '
                     </ul>
+                </li>' . PHP_EOL;
+        }
+
+        return '<li class="nav-item">
+                    <a href="' . $menuLinks[0]['link-url'] . '" class="nav-link">
+                        <i class="nav-icon ' . $menu['icon'] . '"></i> ' . $menu['title'] . '
+                    </a>
                 </li>' . PHP_EOL;
     }
 
-    private function navWithChildren($menu): string
+    protected function navWithChildren($menu): string
     {
         return PHP_EOL . '<li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
@@ -83,24 +95,24 @@ class MenuBarPresenter
                 </li>' . PHP_EOL;
     }
 
-    private function navLink($links): string
+    protected function navLink($links): string
     {
         $linkHtml = '';
 
         foreach ($links as $link) {
             $navItemCssClasses = implode(' ',array_merge($link['link-css-class'],['nav_items']));
 
-            $linkHtml .= "<li class='".$navItemCssClasses."'>".
-                "<a class='nav-link' href='" . $link['link-url'] . "'>".
-                "<i class='nav-icon " . $link['link-icon'] . "'></i>" . $link['link-title'] .
-                "</a>".
-                "</li>" . PHP_EOL;
+            $linkHtml .= "<li class='".$navItemCssClasses."'>"
+                ."<a class='nav-link' href='" . $link['link-url'] . "'>"
+                ."<i class='nav-icon " . $link['link-icon'] . "'></i>" . $link['link-title']
+                ."</a>"
+                ."</li>" . PHP_EOL;
         }
 
         return $linkHtml;
     }
 
-    private function children($menu): string
+    protected function children($menu): string
     {
         $children = '';
 
@@ -112,6 +124,4 @@ class MenuBarPresenter
 
         return $children;
     }
-
-
 }

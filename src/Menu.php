@@ -33,7 +33,7 @@ class Menu
         return new self();
     }
 
-    public function add(string $title,string $icon = 'fa fa-home'): Menu
+    public function add(string $title, string $icon = 'fa fa-home'): Menu
     {
         $nav = strtolower($title);
 
@@ -42,30 +42,34 @@ class Menu
         $this->tail = $this->nav;
 
         $this->tempMenu[$nav] = [
-            'icon' => $icon,
-            'title' => $title
+            'icon'  => $icon,
+            'title' => $title,
         ];
 
         return $this;
     }
 
-    public function link(string $url, string $title = null,string $icon = null,array $css_classes = []): Menu
-    {
-        $injectTo = $this->tail . '.nav-links';
+    public function link(
+        string $url,
+        string $title = null,
+        string $icon = null,
+        array $css_classes = []
+    ): Menu {
+        $injectTo = $this->tail.'.nav-links';
 
         $values = Arr::get($this->tempMenu, $injectTo);
 
         $links = [
-            'link-title' => $this->resolveLinkTitle($url,$title),
-            'link-url' => $url,
-            'link-icon' => $icon,
+            'link-title'     => $title ?: $this->resolveLinkTitle($url),
+            'link-url'       => $url,
+            'link-icon'      => $icon ?: 'far fa-circle nav-icon',
             'link-css-class' => $css_classes,
         ];
 
         if ($values == null) {
             Arr::set($this->tempMenu, $injectTo, [$links]);
         } else {
-            array_push($values,$links);
+            array_push($values, $links);
 
             Arr::set($this->tempMenu, $injectTo, $values);
         }
@@ -73,22 +77,26 @@ class Menu
         return $this;
     }
 
-    public function children(string $title,string $icon = 'fa fa-home'): Menu
+    public function children(string $title, string $icon = 'fa fa-home'): Menu
     {
         $nav = strtolower($title);
 
-        $this->tail = $this->tail . '.children.' . $nav;
+        $this->tail = $this->tail.'.children.'.$nav;
 
-        Arr::set($this->tempMenu, $this->tail, [
-                'icon' => $icon,
-                'title' => $title
+        Arr::set(
+            $this->tempMenu,
+            $this->tail,
+            [
+                'icon'  => $icon,
+                'title' => $title,
             ]
         );
 
         return $this;
     }
 
-    public function make(){
+    public function make()
+    {
         $this->pushMenu($this->nav, $this->tempMenu[$this->nav]);
 
         $this->tempMenu = [];
@@ -96,27 +104,27 @@ class Menu
         $this->nav = null;
     }
 
-    private function pushMenu(string $name,array $value){
+    private function pushMenu(string $name, array $value)
+    {
         $this->menus[$name] = $value;
     }
 
-    private function resolveLinkTitle(string $url,string $title = null): string
+    private function resolveLinkTitle(string $url): string
     {
-        if (empty($title)){
-            $name = app('router')->getRoutes()->match(app('request')->create($url,'GET'))->getName();
+        $name = app('router')->getRoutes()->match(
+            app('request')->create($url, 'GET')
+        )->getName();
 
-            $title = ucwords(str_replace('.', ' ', $name));
-        }
-
-        return $title;
+        return ucwords(str_replace('.', ' ', $name));
     }
+
 
     /**
      * @throws Exception
      */
     public function toHtml(): string
     {
-        return (new MenuBuilder())->build();
+        return MenuBuilder::instance()->menus($this->toArray())->build();
     }
 
     public function toArray(): array

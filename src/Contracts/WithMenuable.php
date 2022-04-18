@@ -3,7 +3,7 @@
 
 namespace RadiateCode\LaravelNavbar\Contracts;
 
-interface IsMenuable
+interface WithMenuable
 {
     public function menuInstantiateException();
 

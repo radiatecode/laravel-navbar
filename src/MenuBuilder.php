@@ -12,10 +12,17 @@ class MenuBuilder
 {
     private $menus = [];
 
-    /**
-     * @var MenuBarPresenter $presenter
-     */
-    private $presenter = MenuBarPresenter::class;
+    private $presenter;
+
+    public function __construct()
+    {
+        $this->presenter = config('navbar.menu-presenter');
+    }
+
+    public static function instance(): MenuBuilder
+    {
+        return new self();
+    }
 
     /**
      * @throws Exception
@@ -24,42 +31,45 @@ class MenuBuilder
     {
         $presenter = $this->getPresenter();
 
-        $this->resolveMenus();
+        $html = $presenter->openNavTag();
 
-        $html = $presenter->openNavTag()
-            . $presenter->openNavULTag();
+        $html .= $presenter->openNavULTag();
 
         foreach ($this->menus as $key => $menu) {
             $html .= $presenter->nav($menu);
         }
 
-        $html .= $presenter->closeNavULTag()
-            . $presenter->closeNavTag();
+        $html .= $presenter->closeNavULTag();
+
+        $html .= $presenter->closeNavTag();
 
         return $html;
     }
 
-    public function injectMenus(array $menus,string $key = null): MenuBuilder
+    /**
+     * @param  array  $menus
+     * @param  string|null  $key // key can contains . to indicate nested
+     *
+     * @return $this
+     */
+    public function injectMenus(array $menus, string $key = null): MenuBuilder
     {
-        if ($key){
-            Arr::set($this->menus,$key,$menus);
+        if ($key) {
+            Arr::set($this->menus, $key, $menus);
 
             return $this;
         }
 
-        $this->menus = array_merge($this->menus,$menus);
+        $this->menus = array_merge($this->menus, $menus);
 
         return $this;
     }
 
-    /**
-     * @throws Exception
-     */
-    private function resolveMenus()
+    public function menus(array $menus): MenuBuilder
     {
-        $service = new MenuService();
+        $this->menus = $menus;
 
-        $this->menus = $service->getMenus();
+        return $this;
     }
 
     private function getPresenter(): MenuBarPresenter
