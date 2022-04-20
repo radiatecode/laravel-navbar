@@ -9,6 +9,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Support\Str;
 use RadiateCode\LaravelNavbar\Contracts\WithMenuable;
 
 class MenuService
@@ -43,7 +44,7 @@ class MenuService
 
         $cacheRoutes = $this->getCacheMenus($routesCount);
 
-        if ($cacheRoutes !== null) {
+        if (config('navbar.cache-enable') && $cacheRoutes !== null) {
             $this->menus = $cacheRoutes;
 
             return $this;
@@ -158,7 +159,9 @@ class MenuService
     {
         $ttl = config('navbar.cache-time');
 
-        if (! Cache::has(self::MENU_COUNT_CACHE_KEY)) {
+        $enable = config('navbar.cache-enable');
+
+        if ($enable && ! Cache::has(self::MENU_COUNT_CACHE_KEY)) {
             Cache::put(self::MENU_COUNT_CACHE_KEY, $routesCount, $ttl);
 
             Cache::put(self::MENU_CACHE_KEY, $menus, $ttl);
@@ -188,21 +191,33 @@ class MenuService
      */
     protected function prepareChildrenMenu(&$menus, &$childrenTobeInjectInParent, $currentMenu, $route): bool
     {
-        $parentControllerInstance = app('\\'.$this->currentMenuInstance->getParent());
+        $parent = $this->currentMenuInstance->getParent();
 
-        if ( ! $parentControllerInstance instanceof WithMenuable) {
-            return false;
+        if (! class_exists('\\'.$parent['name'])){
+            $parentMenuName = Str::slug($parent['name']);
+
+            if (! Arr::get($menus, $parentMenuName)) {
+                $menus[$parentMenuName] = [
+                    'icon'      => $parent['icon'],
+                    'title'     => ucwords(str_replace('-', ' ', $parentMenuName)),
+                    'nav-links' => []
+                ];
+            }
+        }else{
+            $parentControllerInstance = app('\\'.$parent['name']);
+
+            if ( ! $parentControllerInstance instanceof WithMenuable) {
+                return false;
+            }
+
+            $parentControllerInstance->menuInstantiateException();
+
+            $parentMenuInstance = $parentControllerInstance->getMenuInstance();
+
+            $parentMenuName = $parentMenuInstance->getMenu()['name'];
         }
 
-        $parentControllerInstance->menuInstantiateException();
-
-        $parentMenuInstance = $parentControllerInstance->getMenuInstance();
-
-        $parentMenu = $parentMenuInstance->getMenu();
-
         $currentMenuName = $currentMenu['name'];
-
-        $parentMenuName = $parentMenu['name'];
 
         // find is the parent menu already live in the $menus
         $exist = $this->keyExists($menus, $parentMenuName);
@@ -214,7 +229,7 @@ class MenuService
 
             $preparedMenu = $this->prepareMenu($currentMenu, $navLinks);
 
-            // check is there any children need to be injected in this current currentMenu
+            // check is there any children need to be injected in this current menu
             if (array_key_exists($currentMenuName, $childrenTobeInjectInParent)) {
                 $preparedMenu[$currentMenuName]['children'] = $childrenTobeInjectInParent[$currentMenuName]['children'];
             }
@@ -247,19 +262,20 @@ class MenuService
 
         $preparedMenu = $this->prepareMenu($currentMenu, $navLinks);
 
-        // check is there any children need to be injected in this parent menu
+        // check is there any children need to be injected in this current menu
         if (array_key_exists($currentMenuName, $childrenTobeInjectInParent)) {
-            $preparedMenu[$currentMenuName]['children']
-                = $childrenTobeInjectInParent[$currentMenuName]['children'];
+            $preparedMenu[$currentMenuName]['children'] = $childrenTobeInjectInParent[$currentMenuName]['children'];
         }
 
-        $navLinksOfChildren = $children.'.'.$currentMenuName.'.nav-links';
+        $childrenMenu = $children.'.'.$currentMenuName;
 
-        if (Arr::get($menus, $children)) { // if nav links of children of parent exist
-            // then add only a nav link to existing children's nav-links
+        $navLinksOfChildren = $childrenMenu.'.nav-links';
+
+        if (Arr::get($menus, $childrenMenu)) { // if children menu exist
+            // then add only a nav link to the nav-links of that children menu
             $this->arr_push($menus, $navLinksOfChildren, $navLinks);
-        } else { // if children not exist then add whole prepared menu as children to parent menu
-            Arr::set($menus, $children, $preparedMenu);
+        } else { // if children not exist then add whole prepared menu as children
+            Arr::set($menus, $childrenMenu, $preparedMenu[$currentMenuName]);
         }
 
         return true;

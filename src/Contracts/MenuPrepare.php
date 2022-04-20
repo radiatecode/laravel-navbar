@@ -8,7 +8,7 @@ interface MenuPrepare
 {
     public function getMenu(): array;
 
-    public function getParent(): string;
+    public function getParent(): array;
 
     public function hasParent(): bool;
 

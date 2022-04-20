@@ -46,42 +46,13 @@ class MenuBarPresenter implements Presenter
 
     public function nav($menu): string
     {
+        return $this->navbarTreeGenerate($menu);
+    }
+
+    protected function navbarTreeGenerate($menu): string
+    {
         if (array_key_exists('children', $menu) && $menu['children']) {
-            return $this->navWithChildren($menu);
-        }
-
-        return $this->navWithNoChildren($menu);
-    }
-
-    protected function navWithNoChildren($menu): string
-    {
-        $menuLinks = $menu['nav-links'];
-
-        if (count($menuLinks) > 1){
-            return '<li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon ' . $menu['icon'] . '"></i>
-                        <p>
-                            ' . $menu['title'] . '
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                       ' . $this->navLink($menuLinks) . '
-                    </ul>
-                </li>' . PHP_EOL;
-        }
-
-        return '<li class="nav-item">
-                    <a href="' . $menuLinks[0]['link-url'] . '" class="nav-link">
-                        <i class="nav-icon ' . $menu['icon'] . '"></i> ' . $menu['title'] . '
-                    </a>
-                </li>' . PHP_EOL;
-    }
-
-    protected function navWithChildren($menu): string
-    {
-        return PHP_EOL . '<li class="nav-item has-treeview">
+            return PHP_EOL . '<li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="nav-icon ' . $menu['icon'] . '"></i>
                         <p>
@@ -93,11 +64,38 @@ class MenuBarPresenter implements Presenter
                        ' . $this->navLink($menu['nav-links']) . $this->children($menu) . '
                     </ul>
                 </li>' . PHP_EOL;
+        }
+
+        if (count($menu['nav-links']) > 1){
+            return '<li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon ' . $menu['icon'] . '"></i>
+                        <p>
+                            ' . $menu['title'] . '
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                       ' . $this->navLink($menu['nav-links']) . '
+                    </ul>
+                </li>' . PHP_EOL;
+        }
+
+        return '<li class="nav-item">
+                    <a href="' . $menu['nav-links'][0]['link-url'] . '" class="nav-link">
+                        <i class="nav-icon ' . $menu['icon'] . '"></i> ' . $menu['title'] . '
+                    </a>
+                </li>' . PHP_EOL;
+
     }
 
     protected function navLink($links): string
     {
         $linkHtml = '';
+
+        if (count($links) == 0){
+            return $linkHtml;
+        }
 
         foreach ($links as $link) {
             $navItemCssClasses = implode(' ',array_merge($link['link-css-class'],['nav_items']));
@@ -118,7 +116,7 @@ class MenuBarPresenter implements Presenter
 
         if (array_key_exists('children', $menu) && $menu['children']) {
             foreach ($menu['children'] as $key => $item) {
-                $children .= $this->navWithChildren($item);
+                $children .= $this->navbarTreeGenerate($item);
             }
         }
 

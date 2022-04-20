@@ -11,6 +11,10 @@ class MenuCacheClearCommand extends Command
 
     private const MENU_COUNT_CACHE_KEY = 'laravel-navbar-count';
 
+    private const MENU_RENDERED_CACHE_KEY = 'laravel-navbar-rendered';
+
+    private const MENU_RENDERED_COUNT_CACHE_KEY = 'laravel-navbar-rendered-count';
+
     /**
      * The console command name.
      *
@@ -34,7 +38,11 @@ class MenuCacheClearCommand extends Command
     {
         Cache::forget(self::MENU_COUNT_CACHE_KEY);
 
+        Cache::forget(self::MENU_RENDERED_COUNT_CACHE_KEY);
+
         Cache::forget(self::MENU_CACHE_KEY);
+
+        Cache::forget(self::MENU_RENDERED_CACHE_KEY);
 
         $this->info('laravel-navbar caches are cleared successfully');
     }

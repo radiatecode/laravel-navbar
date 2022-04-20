@@ -12,7 +12,7 @@ class MenuPrepare implements MenuPrepareContract
 
     private $links = [];
 
-    private $childOf = '';
+    private $childOf = [];
 
     private $appendTo = [];
 
@@ -54,13 +54,17 @@ class MenuPrepare implements MenuPrepareContract
     /**
      * Menus is child of another menu
      *
-     * @param string $controllerClass
+     * @param string $name
+     * @param string $icon
      *
      * @return $this
      */
-    public function childOf(string $controllerClass): MenuPrepare
+    public function childOf(string $name,string $icon = 'fa fa-circle'): MenuPrepare
     {
-        $this->childOf = $controllerClass;
+        $this->childOf =  [
+            'name' => $name,
+            'icon' => $icon
+        ];;
 
         return $this;
     }
@@ -104,7 +108,7 @@ class MenuPrepare implements MenuPrepareContract
         return $this->menu;
     }
 
-    public function getParent(): string
+    public function getParent(): array
     {
         return $this->childOf;
     }
