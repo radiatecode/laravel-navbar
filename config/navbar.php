@@ -4,7 +4,9 @@ use RadiateCode\LaravelNavbar\Presenter\MenuBarPresenter;
 
 return [
     /**
-     * HTML presenter for menu/navbar
+     * Presenter for navbar style
+     * 
+     * [HTML presenter]
      */
     'menu-presenter' => MenuBarPresenter::class,
 

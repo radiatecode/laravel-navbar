@@ -79,6 +79,10 @@ class MenuService
 
             $this->currentMenuInstance = $currentControllerInstance->getMenuInstance();
 
+            if($this->currentMenuInstance->hasHeader()){
+                $this->prepareHeader($menus);
+            }
+
             $this->currentMenuLinks = $this->currentMenuInstance->getLinks();
 
             if ( ! in_array($this->currentControllerMethod, array_keys($this->currentMenuLinks))) {
@@ -100,7 +104,7 @@ class MenuService
 
             /**
              * ------------------------------------------------------
-             * Current menu is children of another menu
+             * Current menu is a children of another menu
              * ------------------------------------------------------
              */
             if ($this->currentMenuInstance->hasParent()) {
@@ -181,6 +185,17 @@ class MenuService
         return $this->menus;
     }
 
+    protected function prepareHeader(&$menus){
+        $header = $this->currentMenuInstance->getHeader();
+
+        if (! Arr::get($menus, $header['name'])) {
+            $menus[$header['name']] = [
+                 'title'     => ucwords(str_replace('-', ' ', $header['name'])),
+                 'type' => $header['type']
+            ];
+        }
+    }
+
     /**
      * @param $menus
      * @param $childrenTobeInjectInParent
@@ -193,6 +208,10 @@ class MenuService
     {
         $parent = $this->currentMenuInstance->getParent();
 
+        /**
+         * If parent menu is not a controller class then prepare the parent menu from the given string
+         * [Note: This non-class parent menu only works as root level menu, it will not append as child]
+         */
         if (! class_exists('\\'.$parent['name'])){
             $parentMenuName = Str::slug($parent['name']);
 
@@ -200,10 +219,18 @@ class MenuService
                 $menus[$parentMenuName] = [
                     'icon'      => $parent['icon'],
                     'title'     => ucwords(str_replace('-', ' ', $parentMenuName)),
+                    'type' => $parent['type'],
                     'nav-links' => []
                 ];
             }
-        }else{
+        }
+
+        /**
+         * If the parent menu is a controller then get the menu info from the controller
+         */
+        
+        else
+        {
             $parentControllerInstance = app('\\'.$parent['name']);
 
             if ( ! $parentControllerInstance instanceof WithMenuable) {
@@ -380,6 +407,8 @@ class MenuService
         $menuPreparation[$menuName]['title'] = ucwords(
             str_replace('-', ' ', $menuName)
         );
+
+        $menuPreparation[$menuName]['type'] = $menu['type'];
 
         $menuPreparation[$menuName]['nav-links'][] = $navLinks;
 

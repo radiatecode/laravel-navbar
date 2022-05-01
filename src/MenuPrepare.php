@@ -10,17 +10,30 @@ class MenuPrepare implements MenuPrepareContract
 {
     private $menu = [];
 
+    private $header = [];
+
     private $links = [];
 
     private $childOf = [];
 
     private $appendTo = [];
 
+    public function addHeader(string $name): MenuPrepare
+    {
+        $this->header = [
+            'name' => Str::slug($name),
+            'type' => 'header'
+        ];
+
+        return $this;
+    }
+
     public function addMenu(string $name, string $icon = 'fa fa-home'): MenuPrepare
     {
         $this->menu = [
             'name' => Str::slug($name),
-            'icon' => $icon
+            'icon' => $icon,
+            'type' => 'menu'
         ];
 
         return $this;
@@ -63,7 +76,8 @@ class MenuPrepare implements MenuPrepareContract
     {
         $this->childOf =  [
             'name' => $name,
-            'icon' => $icon
+            'icon' => $icon,
+            'type' => 'menu'
         ];;
 
         return $this;
@@ -88,6 +102,11 @@ class MenuPrepare implements MenuPrepareContract
         return ! empty($this->childOf);
     }
 
+    public function hasHeader(): bool
+    {
+        return ! empty($this->header);
+    }
+
     public function isAppendable(): bool
     {
         return ! empty($this->appendTo);
@@ -106,6 +125,11 @@ class MenuPrepare implements MenuPrepareContract
     public function getMenu(): array
     {
         return $this->menu;
+    }
+
+    public function getHeader(): array
+    {
+        return $this->header;
     }
 
     public function getParent(): array

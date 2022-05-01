@@ -49,6 +49,13 @@ class MenuBuilder
         $html .= $presenter->openNavULTag();
 
         foreach ($this->menus as $key => $menu) {
+            if($menu['type'] == 'header'){
+
+                $html .= $presenter->header($menu['title']);
+
+                continue;
+            }
+
             $html .= $presenter->nav($menu);
         }
 
