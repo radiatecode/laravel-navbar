@@ -9,7 +9,7 @@ use Exception;
 use Illuminate\Support\Arr;
 
 
-class Menu
+class Nav
 {
     private $menus = [];
 
@@ -19,7 +19,7 @@ class Menu
 
     private $tail = null;
 
-    public static function create($name, Closure $closure): Menu
+    public static function create($name, Closure $closure): Nav
     {
         $obj = self::new();
 
@@ -28,12 +28,12 @@ class Menu
         return $obj;
     }
 
-    public static function new(): Menu
+    public static function new(): Nav
     {
         return new self();
     }
 
-    public function add(string $title, string $icon = 'fa fa-home'): Menu
+    public function add(string $title, string $icon = 'fa fa-home'): Nav
     {
         $nav = strtolower($title);
 
@@ -54,7 +54,7 @@ class Menu
         string $title = null,
         string $icon = null,
         array $css_classes = []
-    ): Menu {
+    ): Nav {
         $injectTo = $this->tail.'.nav-links';
 
         $values = Arr::get($this->tempMenu, $injectTo);
@@ -77,7 +77,7 @@ class Menu
         return $this;
     }
 
-    public function children(string $title, string $icon = 'fa fa-home'): Menu
+    public function children(string $title, string $icon = 'fa fa-home'): Nav
     {
         $nav = strtolower($title);
 
@@ -124,7 +124,7 @@ class Menu
      */
     public function toHtml(): string
     {
-        return MenuBuilder::instance()->menus($this->toArray())->build();
+        return NavBuilder::instance()->menus($this->toArray())->build();
     }
 
     public function toArray(): array

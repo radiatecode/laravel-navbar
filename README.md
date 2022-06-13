@@ -6,18 +6,18 @@ This package generate navigation bar for laravel application. In two ways we can
 ## Sample
 
 ```php
-use RadiateCode\LaravelNavbar\Traits\Manuable;
-use RadiateCode\LaravelNavbar\Contracts\WithMenuable;
+use RadiateCode\LaravelNavbar\Traits\NavGenerator;
+use RadiateCode\LaravelNavbar\Contracts\WithNavGenerator;
 
-class OfficeController extends Controller implements WithMenuable
+class OfficeController extends Controller implements WithNavGenerator
 {
-    use Manuable;
+    use NavGenerator;
 
     public function __construct()
     {
         $this->menu()
-            ->addMenu('Offices','fa fa-landmark')
-            ->linkByMethod('index') // route associate method
+            ->addNav('Offices','fa fa-landmark')
+            ->addNavLink('index') // route associate method
             ->childOf('Meta','fa fa-wrench');
     }
 
@@ -30,15 +30,15 @@ class OfficeController extends Controller implements WithMenuable
 
 .............
 
-class ProjectController extends Controller implements WithMenuable
+class ProjectController extends Controller implements WithNavGenerator
 {
    
     public function __construct()
     {
         $this->menu()
-            ->addMenu('Project','fa fa-project-diagram')
-            ->linkByMethod('create','New','fa fa-plus-circle')
-            ->linkByMethod('index','List','fa fa-list');
+            ->addNav('Project','fa fa-project-diagram')
+            ->addNavLink('create','New','fa fa-plus-circle')
+            ->addNavLink('index','List','fa fa-list');
     }
 
     public function index(){
@@ -55,7 +55,7 @@ class ProjectController extends Controller implements WithMenuable
 Generate navigation bar using view composer
 
 ```php
-use RadiateCode\LaravelNavbar\MenuService;
+use RadiateCode\LaravelNavbar\NavService;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -63,7 +63,7 @@ class ViewServiceProvider extends ServiceProvider
     public function boot()
     {
         View::composer('layouts.partials._left_nav',function(View $view){
-            $view->with('navbar', MenuService::instance()->menus()->toHtml())
+            $view->with('navbar', NavService::instance()->menus()->toHtml())
         });
     }
 
@@ -99,7 +99,7 @@ You can install the package via composer:
 
     composer require radiatecode/laravel-navbar
 
-Publish config file
+Publish config file (optional)
 
     php artisan vendor:publish --provider="RadiateCode\LaravelNavbar\NavbarServiceProvider" --tag="navbar-config"
 
@@ -107,22 +107,22 @@ Publish config file
 
 ## Controller Basis
 
-In the controller implement the **WithMenuable** Interface and use the **Manuable** trait. Define the menu in the **construct** by using `$this->menu()`. This will provide some methods to prepare the menu items.
+To create menu by route definiation implement the **WithMenuable** Interface and use the **Manuable** trait in controller. Define the menu in the **construct** by using `$this->menu()`. This will provide some methods to prepare the menu items.
 
 ```php
-use RadiateCode\LaravelNavbar\Contracts\WithMenuable;
-use RadiateCode\LaravelNavbar\Traits\Manuable;
+use RadiateCode\LaravelNavbar\Contracts\WithNavGenerator;
+use RadiateCode\LaravelNavbar\Traits\NavGenerator;
 
-class ExampleController extends Controller implements WithMenuable
+class ExampleController extends Controller implements WithNavGenerator
 {
-    use Manuable;
+    use NavGenerator;
    
     public function __construct()
     {
         $this->menu()
-            ->addMenu('ManuName','fa fa-project-diagram')
-            ->linkByMethod('create','New','fa fa-plus-circle')
-            ->linkByMethod('index','List','fa fa-list');
+            ->addNav('ManuName','fa fa-project-diagram')
+            ->addNavLink('create','New','fa fa-plus-circle')
+            ->addNavLink('index','List','fa fa-list');
     }
 
 }
@@ -131,9 +131,9 @@ class ExampleController extends Controller implements WithMenuable
 
 - `addHeader(string $name)` : Add header for navbar
 
-- `addMenu(string $name, string $icon = 'fa fa-home')` : Define the menu name
+- `addNav(string $name, string $icon = 'fa fa-home')` : Define the menu name
 
-- `linkByMethod(string $method_name,string $title = null,string $icon = null,array $css_classes = [])` : Define the method name which will work as a menu item link. Defined method must be a route associative method
+- `addNavLink(string $method_name,string $title = null,string $icon = null,array $css_classes = [])` : Define the method name which will work as a menu item link. Defined method must be a route associative method. `$title` param is optional if no title pass the package generate a title from the name of method associate **route**.
 
 - `childOf(string $name,string $icon = 'fa fa-circle')` : Define the parent menu. If the menu is a child of another menu then define that parent menu. We can pass controler name as a parent menu or we can pass just string name as a parent menu. See [example]()
 

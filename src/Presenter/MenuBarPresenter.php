@@ -21,7 +21,7 @@ class MenuBarPresenter implements Presenter
     public function openNavULTag(string $class = null, array $attributes = []): string
     {
         return PHP_EOL
-            . '<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">'
+            . '<ul class="nav nav-pills nav-sidebar flex-column nav-child-indent menu-open" data-widget="treeview" role="menu" data-accordion="false">'
             . PHP_EOL;
     }
 
@@ -51,6 +51,9 @@ class MenuBarPresenter implements Presenter
 
     protected function navbarTreeGenerate($menu): string
     {
+        /**
+         * Tree navbar with nav links and children navs
+         */
         if (array_key_exists('children', $menu) && $menu['children']) {
             return PHP_EOL . '<li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
@@ -66,6 +69,9 @@ class MenuBarPresenter implements Presenter
                 </li>' . PHP_EOL;
         }
 
+        /**
+         * Tree navbar with nav links
+         */
         if (count($menu['nav-links']) > 1){
             return '<li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
@@ -81,9 +87,12 @@ class MenuBarPresenter implements Presenter
                 </li>' . PHP_EOL;
         }
 
+        /**
+         * Single nav link [no-tree]
+         */
         return '<li class="nav-item">
                     <a href="' . $menu['nav-links'][0]['link-url'] . '" class="nav-link">
-                        <i class="nav-icon ' . $menu['icon'] . '"></i> ' . $menu['title'] . '
+                        <i class="nav-icon ' . $menu['icon'] . '"></i> <p> ' . $menu['title'] . ' </p>
                     </a>
                 </li>' . PHP_EOL;
 

@@ -9,7 +9,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use RadiateCode\LaravelNavbar\Presenter\MenuBarPresenter;
 
-class MenuBuilder
+class NavBuilder
 {
     private $menus = [];
 
@@ -24,7 +24,7 @@ class MenuBuilder
         $this->presenter = config('navbar.menu-presenter');
     }
 
-    public static function instance(): MenuBuilder
+    public static function instance(): NavBuilder
     {
         return new self();
     }
@@ -74,7 +74,7 @@ class MenuBuilder
      *
      * @return $this
      */
-    public function injectMenus(array $menus, string $key = null): MenuBuilder
+    public function injectMenus(array $menus, string $key = null): NavBuilder
     {
         if ($key) {
             Arr::set($this->menus, $key, $menus);
@@ -87,7 +87,7 @@ class MenuBuilder
         return $this;
     }
 
-    public function menus(array $menus): MenuBuilder
+    public function menus(array $menus): NavBuilder
     {
         $this->menus = $menus;
 

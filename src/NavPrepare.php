@@ -4,9 +4,9 @@
 namespace RadiateCode\LaravelNavbar;
 
 use Illuminate\Support\Str;
-use RadiateCode\LaravelNavbar\Contracts\MenuPrepare as MenuPrepareContract;
+use RadiateCode\LaravelNavbar\Contracts\NavPrepare as NavPrepareContract;
 
-class MenuPrepare implements MenuPrepareContract
+class NavPrepare implements NavPrepareContract
 {
     private $menu = [];
 
@@ -18,22 +18,26 @@ class MenuPrepare implements MenuPrepareContract
 
     private $appendTo = [];
 
-    public function addHeader(string $name): MenuPrepare
+    private $permissions = [];
+
+    public function addHeader(string $name): NavPrepare
     {
         $this->header = [
             'name' => Str::slug($name),
-            'type' => 'header'
+            'type' => 'header',
         ];
 
         return $this;
     }
 
-    public function addMenu(string $name, string $icon = 'fa fa-home'): MenuPrepare
-    {
+    public function addNav(
+        string $name,
+        string $icon = 'fa fa-home'
+    ): NavPrepare {
         $this->menu = [
             'name' => Str::slug($name),
             'icon' => $icon,
-            'type' => 'menu'
+            'type' => 'menu',
         ];
 
         return $this;
@@ -49,12 +53,12 @@ class MenuPrepare implements MenuPrepareContract
      *
      * @return $this
      */
-    public function linkByMethod(
+    public function addNavLink(
         string $method_name,
         string $title = null,
         string $icon = null,
         array $css_classes = []
-    ): MenuPrepare {
+    ): NavPrepare {
         $this->links[$method_name] = [
             'link-title' => $title,
             'link-icon' => $icon ?: 'far fa-circle nav-icon',
@@ -64,21 +68,30 @@ class MenuPrepare implements MenuPrepareContract
         return $this;
     }
 
+    public function setPermissions(array $permissions): NavPrepare
+    {
+        $this->permissions = $permissions;
+
+        return $this;
+    }
+
     /**
      * Menus is child of another menu
      *
-     * @param string $name
-     * @param string $icon
+     * @param  string  $name
+     * @param  string  $icon
      *
      * @return $this
      */
-    public function childOf(string $name,string $icon = 'fa fa-circle'): MenuPrepare
-    {
-        $this->childOf =  [
+    public function childOf(
+        string $name,
+        string $icon = 'fa fa-circle'
+    ): NavPrepare {
+        $this->childOf = [
             'name' => $name,
             'icon' => $icon,
-            'type' => 'menu'
-        ];;
+            'type' => 'menu',
+        ];
 
         return $this;
     }
@@ -86,11 +99,11 @@ class MenuPrepare implements MenuPrepareContract
     /**
      * Menu append to another menu
      *
-     * @param string $controllerClass
+     * @param  string  $controllerClass
      *
      * @return $this
      */
-    public function appendTo(string $controllerClass): MenuPrepare
+    public function appendTo(string $controllerClass): NavPrepare
     {
         $this->appendTo[] = $controllerClass;
 
@@ -122,7 +135,7 @@ class MenuPrepare implements MenuPrepareContract
         return $this->appendTo;
     }
 
-    public function getMenu(): array
+    public function getNav(): array
     {
         return $this->menu;
     }
@@ -137,8 +150,27 @@ class MenuPrepare implements MenuPrepareContract
         return $this->childOf;
     }
 
-    public function getLinks(): array
+    public function getNavLinks(): array
     {
         return $this->links;
+    }
+
+    public function getMenuPermissions(): array
+    {
+        return $this->permissions;
+    }
+
+    public function when(
+        bool $value,
+        callable $callback,
+        callable $default = null
+    ) {
+        if ($value) {
+            return $callback($this) ?: $this;
+        } elseif ($default) {
+            return $default($this) ?: $this;
+        }
+
+        return $this;
     }
 }

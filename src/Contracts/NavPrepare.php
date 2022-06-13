@@ -4,9 +4,9 @@
 namespace RadiateCode\LaravelNavbar\Contracts;
 
 
-interface MenuPrepare
+interface NavPrepare
 {
-    public function getMenu(): array;
+    public function getNav(): array;
 
     public function getParent(): array;
 
@@ -14,9 +14,15 @@ interface MenuPrepare
 
     public function hasInconsistencyInAppend(): bool;
 
-    public function getLinks(): array;
+    public function getNavLinks(): array;
 
     public function isAppendable(): bool;
 
     public function getAppends(): array;
+
+    public function hasHeader(): bool;
+
+    public function getHeader(): array;
+
+    public function getMenuPermissions(): array;
 }

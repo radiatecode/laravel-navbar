@@ -5,31 +5,31 @@ namespace RadiateCode\LaravelNavbar\Traits;
 
 
 use Exception;
-use RadiateCode\LaravelNavbar\MenuPrepare;
+use RadiateCode\LaravelNavbar\NavPrepare;
 
-trait Manuable
+trait NavGenerator
 {
     /**
-     * @var MenuPrepare $menu
+     * @var NavPrepare $menu
      */
     private $menu = null;
 
-    private function menu(): MenuPrepare
+    private function navigation(): NavPrepare
     {
-        return $this->menu = new MenuPrepare();
+        return $this->menu = new NavPrepare();
     }
 
     /**
      * @throws Exception
      */
-    public function menuInstantiateException()
+    public function navbarInstantiateException()
     {
         if (empty($this->menu)){
             throw new Exception('No menu instantiated for this controller');
         }
     }
 
-    public function getMenuInstance(): MenuPrepare
+    public function getNavbarInstance(): NavPrepare
     {
         return $this->menu;
     }

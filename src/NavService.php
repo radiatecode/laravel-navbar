@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Str;
-use RadiateCode\LaravelNavbar\Contracts\WithMenuable;
+use RadiateCode\LaravelNavbar\Contracts\WithNavGenerator;
 
-class MenuService
+class NavService
 {
     private $tail = [];
 
@@ -24,11 +24,23 @@ class MenuService
 
     private $currentMenuLinks = [];
 
+    private $permissions = [];
+
     private const MENU_CACHE_KEY = 'laravel-navbar';
 
     private const MENU_COUNT_CACHE_KEY = 'laravel-navbar-count';
 
-    public static function instance(): MenuService
+    public function __construct()
+    {
+        $resolver = config('navbar.permissions-resolver');
+
+        if (class_exists($resolver)){
+            $this->permissions = (new $resolver())->resolve();
+        }
+    }
+
+
+    public static function instance(): NavService
     {
         return new self();
     }
@@ -36,7 +48,7 @@ class MenuService
     /**
      * @throws Exception
      */
-    public function menus(): MenuService
+    public function menus(): NavService
     {
         $routes = Route::getRoutes();
 
@@ -69,21 +81,27 @@ class MenuService
 
             $currentControllerInstance = app('\\'.$currentController);
 
-            if ( ! $currentControllerInstance instanceof WithMenuable) {
+            if ( ! $currentControllerInstance instanceof WithNavGenerator) {
                 continue;
             }
 
-            $currentControllerInstance->menuInstantiateException();
+            $currentControllerInstance->navbarInstantiateException();
 
             $this->currentControllerMethod = $actionExtract[1]; // $route->getActionMethod()
 
-            $this->currentMenuInstance = $currentControllerInstance->getMenuInstance();
+            $this->currentMenuInstance = $currentControllerInstance->getNavbarInstance();
+
+            $currentMenuPermissions = $this->currentMenuInstance->getMenuPermissions();
+
+            if (!empty($currentMenuPermissions) && !$this->hasPermission($currentMenuPermissions)){
+                continue;
+            }
 
             if($this->currentMenuInstance->hasHeader()){
                 $this->prepareHeader($menus);
             }
 
-            $this->currentMenuLinks = $this->currentMenuInstance->getLinks();
+            $this->currentMenuLinks = $this->currentMenuInstance->getNavLinks();
 
             if ( ! in_array($this->currentControllerMethod, array_keys($this->currentMenuLinks))) {
                 continue;
@@ -100,7 +118,7 @@ class MenuService
                 continue;
             }
 
-            $currentMenu = $this->currentMenuInstance->getMenu();
+            $currentMenu = $this->currentMenuInstance->getNav();
 
             /**
              * ------------------------------------------------------
@@ -108,7 +126,7 @@ class MenuService
              * ------------------------------------------------------
              */
             if ($this->currentMenuInstance->hasParent()) {
-                $this->prepareChildrenMenu($menus, $childrenTobeInjectInParent, $currentMenu, $route);
+                $this->prepareChildrenNav($menus, $childrenTobeInjectInParent, $currentMenu, $route);
             }
 
             /**
@@ -123,7 +141,7 @@ class MenuService
                 if (Arr::get($menus, $currentMenuName.'.nav-links')) {
                     $this->arr_push($menus,$currentMenuName.'.nav-links',$this->prepareNavLink($route));
                 }else{
-                    $preparedMenu = $this->prepareMenu($currentMenu, $this->prepareNavLink($route));
+                    $preparedMenu = $this->prepareNav($currentMenu, $this->prepareNavLink($route));
 
                     $menus[$currentMenuName] = $preparedMenu[$currentMenuName];
                 }
@@ -177,7 +195,7 @@ class MenuService
      */
     public function toHtml(): string
     {
-        return MenuBuilder::instance()->menus($this->toArray())->build();
+        return NavBuilder::instance()->menus($this->toArray())->build();
     }
 
     public function toArray(): array
@@ -204,7 +222,7 @@ class MenuService
      *
      * @return bool
      */
-    protected function prepareChildrenMenu(&$menus, &$childrenTobeInjectInParent, $currentMenu, $route): bool
+    protected function prepareChildrenNav(&$menus, &$childrenTobeInjectInParent, $currentMenu, $route): bool
     {
         $parent = $this->currentMenuInstance->getParent();
 
@@ -233,15 +251,15 @@ class MenuService
         {
             $parentControllerInstance = app('\\'.$parent['name']);
 
-            if ( ! $parentControllerInstance instanceof WithMenuable) {
+            if ( ! $parentControllerInstance instanceof WithNavGenerator) {
                 return false;
             }
 
-            $parentControllerInstance->menuInstantiateException();
+            $parentControllerInstance->navbarInstantiateException();
 
-            $parentMenuInstance = $parentControllerInstance->getMenuInstance();
+            $parentMenuInstance = $parentControllerInstance->getNavbarInstance();
 
-            $parentMenuName = $parentMenuInstance->getMenu()['name'];
+            $parentMenuName = $parentMenuInstance->getNav()['name'];
         }
 
         $currentMenuName = $currentMenu['name'];
@@ -254,7 +272,7 @@ class MenuService
         if ( ! $exist) {
             $navLinks = $this->prepareNavLink($route);
 
-            $preparedMenu = $this->prepareMenu($currentMenu, $navLinks);
+            $preparedMenu = $this->prepareNav($currentMenu, $navLinks);
 
             // check is there any children need to be injected in this current menu
             if (array_key_exists($currentMenuName, $childrenTobeInjectInParent)) {
@@ -287,7 +305,7 @@ class MenuService
         // prepare the current menu array
         $navLinks = $this->prepareNavLink($route);
 
-        $preparedMenu = $this->prepareMenu($currentMenu, $navLinks);
+        $preparedMenu = $this->prepareNav($currentMenu, $navLinks);
 
         // check is there any children need to be injected in this current menu
         if (array_key_exists($currentMenuName, $childrenTobeInjectInParent)) {
@@ -323,15 +341,15 @@ class MenuService
 
         $appendControllerInstance = $this->makeAppendControllerInstance();
 
-        if ( ! $appendControllerInstance instanceof WithMenuable) {
+        if ( ! $appendControllerInstance instanceof WithNavGenerator) {
             return null;
         }
 
-        $appendControllerInstance->menuInstantiateException();
+        $appendControllerInstance->navbarInstantiateException();
 
-        $appendMenuInstance = $appendControllerInstance->getMenuInstance();
+        $appendMenuInstance = $appendControllerInstance->getNavbarInstance();
 
-        $appendMenu = $appendMenuInstance->getMenu();
+        $appendMenu = $appendMenuInstance->getNav();
 
         $appendMenuName = $appendMenu['name'];
 
@@ -396,7 +414,7 @@ class MenuService
      *
      * @return array
      */
-    protected function prepareMenu($menu, $navLinks): array
+    protected function prepareNav($menu, $navLinks): array
     {
         $menuPreparation = [];
 
@@ -530,5 +548,21 @@ class MenuService
         $array[array_shift($keys)][] = $value;
 
         return $array;
+    }
+
+    /**
+     * @param $access
+     *
+     * @return bool
+     */
+    private function hasPermission($access): bool
+    {
+        if (is_array($access) && is_countable($access)){ // if access param is array
+            foreach ($access as $value){
+                return in_array($value, $this->permissions);
+            }
+        }
+
+        return in_array($access, $this->permissions);
     }
 }
