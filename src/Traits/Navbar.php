@@ -7,7 +7,7 @@ namespace RadiateCode\LaravelNavbar\Traits;
 use Exception;
 use RadiateCode\LaravelNavbar\NavPrepare;
 
-trait NavGenerator
+trait Navbar
 {
     /**
      * @var NavPrepare $menu

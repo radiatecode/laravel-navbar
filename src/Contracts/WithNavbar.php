@@ -3,7 +3,7 @@
 
 namespace RadiateCode\LaravelNavbar\Contracts;
 
-interface WithNavGenerator
+interface WithNavbar
 {
     public function navbarInstantiateException();
 

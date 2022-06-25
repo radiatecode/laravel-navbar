@@ -6,12 +6,12 @@ This package generate navigation bar for laravel application. In two ways we can
 ## Sample
 
 ```php
-use RadiateCode\LaravelNavbar\Traits\NavGenerator;
-use RadiateCode\LaravelNavbar\Contracts\WithNavGenerator;
+use RadiateCode\LaravelNavbar\Traits\Navbar;
+use RadiateCode\LaravelNavbar\Contracts\WithNavbar;
 
-class OfficeController extends Controller implements WithNavGenerator
+class OfficeController extends Controller implements WithNavbar
 {
-    use NavGenerator;
+    use Navbar;
 
     public function __construct()
     {
@@ -30,7 +30,7 @@ class OfficeController extends Controller implements WithNavGenerator
 
 .............
 
-class ProjectController extends Controller implements WithNavGenerator
+class ProjectController extends Controller implements WithNavbar
 {
    
     public function __construct()
@@ -110,12 +110,12 @@ Publish config file (optional)
 To create menu by route definiation implement the **WithMenuable** Interface and use the **Manuable** trait in controller. Define the menu in the **construct** by using `$this->menu()`. This will provide some methods to prepare the menu items.
 
 ```php
-use RadiateCode\LaravelNavbar\Contracts\WithNavGenerator;
-use RadiateCode\LaravelNavbar\Traits\NavGenerator;
+use RadiateCode\LaravelNavbar\Contracts\WithNavbar;
+use RadiateCode\LaravelNavbar\Traits\Navbar;
 
-class ExampleController extends Controller implements WithNavGenerator
+class ExampleController extends Controller implements WithNavbar
 {
-    use NavGenerator;
+    use Navbar;
    
     public function __construct()
     {

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Str;
-use RadiateCode\LaravelNavbar\Contracts\WithNavGenerator;
+use RadiateCode\LaravelNavbar\Contracts\WithNavbar;
 
 class NavService
 {
@@ -81,7 +81,7 @@ class NavService
 
             $currentControllerInstance = app('\\'.$currentController);
 
-            if ( ! $currentControllerInstance instanceof WithNavGenerator) {
+            if ( ! $currentControllerInstance instanceof WithNavbar) {
                 continue;
             }
 
@@ -251,7 +251,7 @@ class NavService
         {
             $parentControllerInstance = app('\\'.$parent['name']);
 
-            if ( ! $parentControllerInstance instanceof WithNavGenerator) {
+            if ( ! $parentControllerInstance instanceof WithNavbar) {
                 return false;
             }
 
@@ -341,7 +341,7 @@ class NavService
 
         $appendControllerInstance = $this->makeAppendControllerInstance();
 
-        if ( ! $appendControllerInstance instanceof WithNavGenerator) {
+        if ( ! $appendControllerInstance instanceof WithNavbar) {
             return null;
         }
 
