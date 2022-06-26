@@ -18,7 +18,7 @@ class NavPrepare implements NavPrepareContract
 
     private $appendTo = [];
 
-    private $permissions = [];
+    private $creatable = true;
 
     public function addHeader(string $name): NavPrepare
     {
@@ -44,6 +44,29 @@ class NavPrepare implements NavPrepareContract
     }
 
     /**
+     * @param callable|bool $condition
+     *
+     * @return $this
+     */
+    public function createIf($condition): NavPrepare
+    {
+        if (is_callable($condition)) {
+            $this->creatable = $condition();
+
+            return $this;
+        }
+
+        if (is_bool($condition)) {
+            $this->creatable = $condition;
+
+            return $this;
+        }
+
+
+        return $this;
+    }
+
+    /**
      * Generate menu link by route controller associate method
      *
      * @param  string  $method_name
@@ -60,17 +83,39 @@ class NavPrepare implements NavPrepareContract
         array $css_classes = []
     ): NavPrepare {
         $this->links[$method_name] = [
-            'link-title' => $title,
-            'link-icon' => $icon ?: 'far fa-circle nav-icon',
+            'link-title'     => $title,
+            'link-icon'      => $icon ?: 'far fa-circle nav-icon',
             'link-css-class' => $css_classes,
         ];
 
         return $this;
     }
 
-    public function setPermissions(array $permissions): NavPrepare
-    {
-        $this->permissions = $permissions;
+    /**
+     * @param  bool|callable  $condition
+     * @param  string  $method_name
+     * @param  string|null  $title
+     * @param  string|null  $icon
+     * @param  array  $css_classes
+     *
+     * @return $this
+     */
+    public function addNavLinkIf(
+        $condition,
+        string $method_name,
+        string $title = null,
+        string $icon = null,
+        array $css_classes = []
+    ): NavPrepare {
+        if (is_bool($condition) && ! $condition) {
+            return $this;
+        }
+
+        if (is_callable($condition) && ! $condition()) {
+            return $this;
+        }
+
+        $this->addNavLink($method_name, $title, $icon, $css_classes);
 
         return $this;
     }
@@ -125,6 +170,11 @@ class NavPrepare implements NavPrepareContract
         return ! empty($this->appendTo);
     }
 
+    public function isCreatable(): bool
+    {
+        return $this->creatable;
+    }
+
     public function hasInconsistencyInAppend(): bool
     {
         return count($this->appendTo) != count($this->links);
@@ -153,11 +203,6 @@ class NavPrepare implements NavPrepareContract
     public function getNavLinks(): array
     {
         return $this->links;
-    }
-
-    public function getMenuPermissions(): array
-    {
-        return $this->permissions;
     }
 
     public function when(

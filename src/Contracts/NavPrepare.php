@@ -22,7 +22,7 @@ interface NavPrepare
 
     public function hasHeader(): bool;
 
-    public function getHeader(): array;
+    public function isCreatable(): bool;
 
-    public function getMenuPermissions(): array;
+    public function getHeader(): array;
 }
