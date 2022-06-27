@@ -12,11 +12,11 @@ trait Navbar
     /**
      * @var NavPrepare $menu
      */
-    private $menu = null;
+    private $nav = null;
 
-    private function navigation(): NavPrepare
+    private function nav(): NavPrepare
     {
-        return $this->menu = new NavPrepare();
+        return $this->nav = new NavPrepare();
     }
 
     /**
@@ -24,13 +24,18 @@ trait Navbar
      */
     public function navbarInstantiateException()
     {
-        if (empty($this->menu)){
-            throw new Exception('No menu instantiated for this controller');
+        if (empty($this->nav)) {
+            throw new Exception(
+                'No navigation instantiated for this controller ['
+                .class_basename($this).']'
+            );
         }
     }
 
     public function getNavbarInstance(): NavPrepare
     {
-        return $this->menu;
+        return $this->nav;
     }
+
+    abstract public function navigation(): void;
 }

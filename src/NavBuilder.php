@@ -7,6 +7,7 @@ namespace RadiateCode\LaravelNavbar;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use RadiateCode\LaravelNavbar\Enums\Constant;
 use RadiateCode\LaravelNavbar\Presenter\MenuBarPresenter;
 
 class NavBuilder
@@ -14,10 +15,6 @@ class NavBuilder
     private $menus = [];
 
     private $presenter;
-
-    private const MENU_RENDERED_CACHE_KEY = 'laravel-navbar-rendered';
-
-    private const MENU_RENDERED_COUNT_CACHE_KEY = 'laravel-navbar-rendered-count';
 
     public function __construct()
     {
@@ -34,12 +31,8 @@ class NavBuilder
      */
     public function build(): string
     {
-        $menuCount = count($this->menus);
-
-        $cacheMenus = $this->getCacheMenus($menuCount);
-
-        if (config('navbar.cache-enable') && $cacheMenus !== null) {
-            return $cacheMenus;
+        if (config('navbar.cache-enable') && $this->hasCache()) {
+            return $this->getCachedHtmlNavs();
         }
 
         $presenter = $this->getPresenter();
@@ -63,7 +56,7 @@ class NavBuilder
 
         $html .= $presenter->closeNavTag();
 
-        $this->cacheMenus($menuCount,$html);
+        $this->cacheHtmlNavs($html);
 
         return $html;
     }
@@ -94,29 +87,24 @@ class NavBuilder
         return $this;
     }
 
-    protected function getCacheMenus(int $menuCount)
+    protected function getCachedHtmlNavs()
     {
-        if ($menuCount !== Cache::get(self::MENU_RENDERED_COUNT_CACHE_KEY)) {
-            Cache::forget(self::MENU_RENDERED_COUNT_CACHE_KEY);
-
-            Cache::forget(self::MENU_RENDERED_CACHE_KEY);
-
-            return null;
-        }
-
-        return Cache::get(self::MENU_RENDERED_CACHE_KEY);
+        return Cache::get(Constant::CACHE_HTML_RENDERED_NAVS);
     }
 
-    protected function cacheMenus(int $menuCount, $menus)
+    protected function hasCache(): bool
+    {
+        return Cache::has(Constant::CACHE_HTML_RENDERED_NAVS);
+    }
+
+    protected function cacheHtmlNavs($menus)
     {
         $ttl = config('navbar.cache-time');
 
         $enable = config('navbar.cache-enable');
 
-        if ($enable && ! Cache::has(self::MENU_RENDERED_COUNT_CACHE_KEY)) {
-            Cache::put(self::MENU_RENDERED_COUNT_CACHE_KEY, $menuCount, $ttl);
-
-            Cache::put(self::MENU_RENDERED_CACHE_KEY, $menus, $ttl);
+        if ($enable) {
+            Cache::put(Constant::CACHE_HTML_RENDERED_NAVS, $menus, $ttl);
         }
     }
 

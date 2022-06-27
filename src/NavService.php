@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Str;
 use RadiateCode\LaravelNavbar\Contracts\WithNavbar;
+use RadiateCode\LaravelNavbar\Enums\Constant;
 
 class NavService
 {
@@ -41,17 +42,13 @@ class NavService
      */
     public function menus(): NavService
     {
-        $routes = Route::getRoutes();
-
-        $routesCount = count($routes);
-
-        $cacheMenus = $this->getCacheMenus($routesCount);
-
-        if (config('navbar.cache-enable') && $cacheMenus !== null) {
-            $this->menus = $cacheMenus;
+        if (config('navbar.cache-enable') && $this->hasCacheNavs()) {
+            $this->menus = $this->getCacheNavs();
 
             return $this;
         }
+
+        $routes = Route::getRoutes();
 
         $menus = [];
 
@@ -75,6 +72,8 @@ class NavService
             if ( ! $currentControllerInstance instanceof WithNavbar) {
                 continue;
             }
+
+            $currentControllerInstance->navigation(); // run the navigation
 
             $currentControllerInstance->navbarInstantiateException();
 
@@ -152,34 +151,29 @@ class NavService
 
         $this->menus = $menus;
 
-        $this->cacheMenus($routesCount,$this->menus);
+        $this->cacheNavs();
 
         return $this;
     }
 
-    protected function getCacheMenus(int $routesCount)
+    protected function getCacheNavs()
     {
-        if ($routesCount !== Cache::get(self::MENU_COUNT_CACHE_KEY)) {
-            Cache::forget(self::MENU_COUNT_CACHE_KEY);
-
-            Cache::forget(self::MENU_CACHE_KEY);
-
-            return null;
-        }
-
         return Cache::get(self::MENU_CACHE_KEY);
     }
 
-    protected function cacheMenus(int $routesCount, $menus)
+    protected function hasCacheNavs(): bool
+    {
+        return Cache::has(Constant::CACHE_NAVS);
+    }
+
+    protected function cacheNavs()
     {
         $ttl = config('navbar.cache-time');
 
         $enable = config('navbar.cache-enable');
 
-        if ($enable && ! Cache::has(self::MENU_COUNT_CACHE_KEY)) {
-            Cache::put(self::MENU_COUNT_CACHE_KEY, $routesCount, $ttl);
-
-            Cache::put(self::MENU_CACHE_KEY, $menus, $ttl);
+        if ($enable && ! $this->hasCacheNavs()) {
+            Cache::put(Constant::CACHE_NAVS, $this->menus, $ttl);
         }
     }
 
@@ -247,6 +241,8 @@ class NavService
             if ( ! $parentControllerInstance instanceof WithNavbar) {
                 return false;
             }
+
+            $parentControllerInstance->navigation(); // run the navigation
 
             $parentControllerInstance->navbarInstantiateException();
 
@@ -337,6 +333,8 @@ class NavService
         if ( ! $appendControllerInstance instanceof WithNavbar) {
             return null;
         }
+
+        $appendControllerInstance->navigation(); // run the navigation
 
         $appendControllerInstance->navbarInstantiateException();
 
