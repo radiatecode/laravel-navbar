@@ -1,6 +1,6 @@
 # Laravel Navbar
 
-This package generate navigation bar for laravel application. In two ways we can generate navbar. Generate navigation by nav service, Or generate navigation during route defination, it means we can define the navigation by controller basis.
+This package generate navigation bar for laravel application. In two ways we can generate navbar. Generate navigation by nav service, Or generate navigation during route definition, it means we can define the navigation by controller basis.
 
 
 ## Sample
