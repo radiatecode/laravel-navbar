@@ -77,7 +77,7 @@ In **_left_nav** partials
     <!-- Sidebar -->
     <div class="sidebar">
         <!-- Sidebar Menu -->
-        {!! $menu !!}
+        {!! $navbar !!}
         <!-- /.sidebar-menu -->
     </div>
     <!-- /.sidebar -->
