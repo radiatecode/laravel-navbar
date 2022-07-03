@@ -8,7 +8,7 @@ use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use RadiateCode\LaravelNavbar\Enums\Constant;
-use RadiateCode\LaravelNavbar\Presenter\MenuBarPresenter;
+use RadiateCode\LaravelNavbar\Presenter\NavBarPresenter;
 
 class NavBuilder
 {
@@ -108,7 +108,7 @@ class NavBuilder
         }
     }
 
-    private function getPresenter(): MenuBarPresenter
+    private function getPresenter(): NavBarPresenter
     {
         return new $this->presenter();
     }

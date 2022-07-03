@@ -1,6 +1,6 @@
 <?php
 
-use RadiateCode\LaravelNavbar\Presenter\MenuBarPresenter;
+use RadiateCode\LaravelNavbar\Presenter\NavBarPresenter;
 
 return [
     /**
@@ -8,7 +8,7 @@ return [
      * 
      * [HTML presenter]
      */
-    'menu-presenter' => MenuBarPresenter::class,
+    'menu-presenter' => NavBarPresenter::class,
 
     /**
      * Cache the render navbar

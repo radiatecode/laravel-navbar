@@ -6,7 +6,7 @@ namespace RadiateCode\LaravelNavbar\Presenter;
 
 use RadiateCode\LaravelNavbar\Contracts\Presenter;
 
-class MenuBarPresenter implements Presenter
+class NavBarPresenter implements Presenter
 {
     public function openNavTag(string $class = null, array $attributes = []): string
     {

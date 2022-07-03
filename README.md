@@ -1,6 +1,6 @@
 # Laravel Navbar
 
-This package generate navigation bar for laravel application. In two ways we can generate navbar. Manually define menus, Or define menus during route defination, it means we can define the menus by controller basis.
+This package generate navigation bar for laravel application. In two ways we can generate navbar. Generate navigation by nav service, Or generate navigation during route defination, it means we can define the navigation by controller basis.
 
 
 ## Sample
@@ -13,9 +13,9 @@ class OfficeController extends Controller implements WithNavbar
 {
     use Navbar;
 
-    public function __construct()
+    public function navigation()
     {
-        $this->menu()
+        $this->nav()
             ->addNav('Offices','fa fa-landmark')
             ->addNavLink('index') // route associate method
             ->childOf('Meta','fa fa-wrench');
@@ -33,9 +33,9 @@ class OfficeController extends Controller implements WithNavbar
 class ProjectController extends Controller implements WithNavbar
 {
    
-    public function __construct()
+    public function navigation()
     {
-        $this->menu()
+        $this->nav()
             ->addNav('Project','fa fa-project-diagram')
             ->addNavLink('create','New','fa fa-plus-circle')
             ->addNavLink('index','List','fa fa-list');
@@ -107,7 +107,7 @@ Publish config file (optional)
 
 ## Controller Basis
 
-To create menu by route definiation implement the **WithMenuable** Interface and use the **Manuable** trait in controller. Define the menu in the **construct** by using `$this->menu()`. This will provide some methods to prepare the menu items.
+To create navigation by route definiation implement the **WithNavbar** Interface and use the **Navbar** trait in controller. Define the menu in the `navigation()` by using `$this->nav()`. This will provide some methods to prepare the nav items.
 
 ```php
 use RadiateCode\LaravelNavbar\Contracts\WithNavbar;
@@ -117,7 +117,7 @@ class ExampleController extends Controller implements WithNavbar
 {
     use Navbar;
    
-    public function __construct()
+    public function navigation(): void
     {
         $this->menu()
             ->addNav('ManuName','fa fa-project-diagram')
@@ -133,21 +133,25 @@ class ExampleController extends Controller implements WithNavbar
 
 - `addNav(string $name, string $icon = 'fa fa-home')` : Define the menu name
 
-- `addNavLink(string $method_name,string $title = null,string $icon = null,array $css_classes = [])` : Define the method name which will work as a menu item link. Defined method must be a route associative method. `$title` param is optional if no title pass the package generate a title from the name of method associate **route**.
+- `addNavLink(string $method_name,string $title = null,string $icon = null,array $css_classes = [])` : Define the method name which will work as a nav item link. Defined method must be a route associative method. `$title` param is optional if no title pass the package generate a title from the name of **route**.
+
+- `addNavLinkIf($condition,string $method_name,string $title = null,string $icon = null,array $css_classes = [])` : Conditionally create a nav link. Under the hood the method implement the `addNavLink()` if certain condition is true.
 
 - `childOf(string $name,string $icon = 'fa fa-circle')` : Define the parent menu. If the menu is a child of another menu then define that parent menu. We can pass controler name as a parent menu or we can pass just string name as a parent menu. See [example]()
+
+- `createIf($condition)` : If certain condition is true then create the navigation with nav links.
 
 ## Render Menu
 
 To rendered the menus you can use `MenuService` class.
 
-    MenuService::instance()->menus()->toHtml();
+    NavService::instance()->menus()->toHtml();
 
 Or
 
-    MenuService::instance()->menus()->toArray();
+    NavService::instance()->menus()->toArray();
 
-> `toHtml()` return built-in html navbar, which is built top of the **bootstrap navbar**. But you can modify the style of the navbar by defining a custom **Menu Presenter** class.
+> `toHtml()` return built-in html navbar, which is built top of the **bootstrap navbar**. But you can modify the style of the navbar by defining a custom **Nav Presenter** class.
 
 
 ## Contributing
