@@ -3,7 +3,7 @@
 namespace RadiateCode\LaravelNavbar;
 
 use Illuminate\Support\ServiceProvider;
-use RadiateCode\LaravelNavbar\Console\MenuCacheClearCommand;
+use RadiateCode\LaravelNavbar\Console\NavCacheClearCommand;
 
 class NavbarServiceProvider extends ServiceProvider
 {
@@ -17,7 +17,7 @@ class NavbarServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands(
                 [
-                    MenuCacheClearCommand::class
+                    NavCacheClearCommand::class
                 ]
             );
         }

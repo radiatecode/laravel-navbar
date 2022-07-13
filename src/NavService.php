@@ -28,10 +28,6 @@ class NavService
 
     private $currentNavLinks = [];
 
-    private const MENU_CACHE_KEY = 'laravel-navbar';
-
-    private const MENU_COUNT_CACHE_KEY = 'laravel-navbar-count';
-
     public static function instance(): NavService
     {
         return new self();
@@ -158,7 +154,7 @@ class NavService
 
     protected function getCacheNavs()
     {
-        return Cache::get(self::MENU_CACHE_KEY);
+        return Cache::get(Constant::CACHE_NAVS);
     }
 
     protected function hasCacheNavs(): bool

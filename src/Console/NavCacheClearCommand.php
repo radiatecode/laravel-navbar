@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use RadiateCode\LaravelNavbar\Enums\Constant;
 
-class MenuCacheClearCommand extends Command
+class NavCacheClearCommand extends Command
 {
     /**
      * The console command name.
