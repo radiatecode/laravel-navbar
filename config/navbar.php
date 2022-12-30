@@ -4,6 +4,11 @@ use RadiateCode\LaravelNavbar\Presenter\NavBarPresenter;
 
 return [
     /**
+     * Controllers path to generate navs
+     */
+    'controllers-path' => app_path('Http/Controllers'),
+    
+    /**
      * Presenter for navbar style
      * 
      * [HTML presenter]
