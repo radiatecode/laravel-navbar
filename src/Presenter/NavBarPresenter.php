@@ -4,131 +4,133 @@
 namespace RadiateCode\LaravelNavbar\Presenter;
 
 
+use Illuminate\Support\Facades\Cache;
 use RadiateCode\LaravelNavbar\Contracts\Presenter;
 
 class NavBarPresenter implements Presenter
 {
-    public function openNavTag(string $class = null, array $attributes = []): string
-    {
-        return PHP_EOL . '<nav class="mt-2">' . PHP_EOL;
-    }
+    protected array $navItems = [];
 
-    public function closeNavTag(): string
+    public function __construct(array $navItems)
     {
-        return PHP_EOL . '</nav>' . PHP_EOL;
-    }
-
-    public function openNavULTag(string $class = null, array $attributes = []): string
-    {
-        return PHP_EOL
-            . '<ul class="nav nav-pills nav-sidebar flex-column nav-child-indent menu-open" data-widget="treeview" role="menu" data-accordion="false">'
-            . PHP_EOL;
-    }
-
-    public function closeNavULTag(): string
-    {
-        return PHP_EOL . '</ul>' . PHP_EOL;
+        $this->navItems = $navItems;
     }
 
     /**
-     * Add header or section
+     * Navigation
      *
-     * @param string      $title
-     * @param string|null $class
-     * @param array       $attributes
-     *
+     * @param string $ul
      * @return string
      */
-    public function header(string $title, string $class = null, array $attributes = []): string
+    protected function navTag(string $ul)
     {
-        return PHP_EOL . '<li class="nav-header">' . $title . '</li>' . PHP_EOL;
+        return PHP_EOL . '<nav class="mt-2">' . $ul . '</nav>' . PHP_EOL;
     }
 
-    public function nav($menu): string
+    /**
+     * Navigation Items
+     *
+     * @param string $navItems
+     * @return string
+     */
+    protected function ulTag(string $navItems)
     {
-        return $this->navbarTreeGenerate($menu);
+        return PHP_EOL . '<ul class="nav nav-pills nav-sidebar flex-column nav-child-indent menu-open" 
+        data-widget="treeview" role="menu" data-accordion="false">' . $navItems . '</ul>' . PHP_EOL;
     }
 
-    protected function navbarTreeGenerate($menu): string
+    /**
+     * Header Tag
+     *
+     * @param string $name
+     * @return string
+     */
+    protected function headerTag(string $name)
     {
-        /**
-         * Tree navbar with nav links and children navs
-         */
-        if (array_key_exists('children', $menu) && $menu['children']) {
-            return PHP_EOL . '<li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon ' . $menu['icon'] . '"></i>
-                        <p>
-                            ' . $menu['title'] . '
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                       ' . $this->navLink($menu['nav-links']) . $this->children($menu) . '
-                    </ul>
-                </li>' . PHP_EOL;
-        }
-
-        /**
-         * Tree navbar with nav links
-         */
-        if (count($menu['nav-links']) > 1){
-            return '<li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon ' . $menu['icon'] . '"></i>
-                        <p>
-                            ' . $menu['title'] . '
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                       ' . $this->navLink($menu['nav-links']) . '
-                    </ul>
-                </li>' . PHP_EOL;
-        }
-
-        /**
-         * Single nav link [no-tree]
-         */
-        return '<li class="nav-item">
-                    <a href="' . $menu['nav-links'][0]['link-url'] . '" class="nav-link">
-                        <i class="nav-icon ' . $menu['icon'] . '"></i> <p> ' . $menu['title'] . ' </p>
-                    </a>
-                </li>' . PHP_EOL;
-
+        return '<li class="nav-header">' . $name . '</li>';
     }
 
-    protected function navLink($links): string
+    /**
+     * Tree Nav
+     *
+     * @param array $navItem
+     * @return string
+     */
+    protected function treeNav(array $navItem)
     {
-        $linkHtml = '';
+        $treeNav = '';
 
-        if (count($links) == 0){
-            return $linkHtml;
-        }
+        $treeNav = PHP_EOL . '<li class="nav-item has-treeview">
+                                <a href="' . $navItem['url'] . '" class="nav-link">
+                                    <i class="nav-icon ' . $navItem['attributes']['icon'] . '"></i>
+                                    <p>
+                                        ' . $navItem['title'] . '
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                            <ul class="nav nav-treeview">' . $this->navItems($navItem['children']['nav-items']) . '</ul></li>' . PHP_EOL;
 
-        foreach ($links as $link) {
-            $navItemCssClasses = implode(' ',array_merge($link['link-css-class'],['nav_items']));
-
-            $linkHtml .= "<li class='".$navItemCssClasses."'>"
-                ."<a class='nav-link' href='" . $link['link-url'] . "'>"
-                ."<i class='nav-icon " . $link['link-icon'] . "'></i>" . $link['link-title']
-                ."</a>"
-                ."</li>" . PHP_EOL;
-        }
-
-        return $linkHtml;
+        return $treeNav;
     }
 
-    protected function children($menu): string
+    /**
+     * Nav item
+     *
+     * @param array $navItem
+     * @return string
+     */
+    protected function navItem(array $navItem)
     {
-        $children = '';
+        return  PHP_EOL . '<li class="nav-item">
+                                <a href="' . $navItem['url'] . '" class="nav-link">
+                                    <i class="nav-icon ' . $navItem['attributes']['icon'] . '"></i>
+                                    <p> ' . $navItem['title'] . ' </p>
+                                </a>
+                           </li>' . PHP_EOL;
+    }
 
-        if (array_key_exists('children', $menu) && $menu['children']) {
-            foreach ($menu['children'] as $key => $item) {
-                $children .= $this->navbarTreeGenerate($item);
+    /**
+     * Make nav items, it can be called recursively to generate deep level nav items
+     *
+     * [ex: Parent Nav -> Children Navs -> Children Navs -> Children Navs]
+     * 
+     * @param array $items
+     * @return string
+     */
+    protected function navItems(array $items)
+    {
+        $nav = '';
+
+        foreach ($items as $item) {
+            $nav .= $this->isTreeNav($item)
+                ? $this->treeNav($item)
+                : $this->navItem($item);
+        }
+
+        return $nav;
+    }
+
+    public function navbar(): string
+    {
+        $nav = '';
+
+        foreach ($this->navItems as $key => $item) {
+            if ($key != 'nav-items' && $item['type'] == 'header') {
+                $nav .= $this->headerTag($item['title']);
+
+                $nav .= $this->navItems($item['nav-items']);
+            }
+
+            if ($key == 'nav-items') {
+                $nav .= $this->navItems($item);
             }
         }
 
-        return $children;
+        return $this->navTag($this->ulTag($nav));
+    }
+
+    protected function isTreeNav(array $nav)
+    {
+        return $nav['url'] == '#' && !empty($nav['children']['nav-items']);
     }
 }
