@@ -4,6 +4,7 @@ namespace RadiateCode\LaravelNavbar\tests\Feature;
 
 use RadiateCode\LaravelNavbar\Nav;
 use RadiateCode\LaravelNavbar\Children;
+use RadiateCode\LaravelNavbar\Facades\Navbar;
 use RadiateCode\LaravelNavbar\tests\TestCase;
 
 class NavItemsGenerateTest extends TestCase
@@ -14,7 +15,7 @@ class NavItemsGenerateTest extends TestCase
     /** @test */
     public function make_nav_items()
     {
-        $nav = Nav::make()
+        $navitems = Nav::make()
             ->header('Adminland', function (Nav $nav) {
                 $nav
                     ->addIf(true, 'Roles', 'http://hrp.test/role-list', ['icon' => 'fa fa-user-tag'])
@@ -64,11 +65,7 @@ class NavItemsGenerateTest extends TestCase
                             ->addIf(true, 'List', 'http://hrp.test/salary-list', ['icon' => 'fa fa-list'])
                             ->addIf(true, 'Create', 'http://hrp.test/create-salary', ['icon' => 'fa fa-plus-circle']);
                     })
-                    ->add('Salary Adjustment', '#', ['icon' => 'fa fa-money-bill-wave'], function (Children $children) {
-                        $children
-                            ->addIf(true, 'List', 'http://hrp.test/salary-adjustment-list', ['icon' => 'fa fa-list'])
-                            ->addIf(true, 'Create', 'http://hrp.test/create-salary-adjustment', ['icon' => 'fa fa-plus-circle']);
-                    })
+                    
                     ->add('Bonus', '#', ['icon' => 'fa fa-money-bill-wave'], function (Children $children) {
                         $children
                             ->addIf(true, 'List', 'http://hrp.test/bonus-list', ['icon' => 'fa fa-list'])
@@ -78,22 +75,6 @@ class NavItemsGenerateTest extends TestCase
                         $children
                             ->addIf(true, 'List', 'http://hrp.test/advance-list', ['icon' => 'fa fa-list'])
                             ->addIf(true, 'Create', 'http://hrp.test/create-advance', ['icon' => 'fa fa-plus-circle']);;
-                    })
-                    ->add('General Deduction', '#', ['icon' => 'fa fa-money-bill-wave'], function (Children $children) {
-                        $children
-                            ->addIf(true, 'List', 'http://hrp.test/general-deduction-list', ['icon' => 'fa fa-list'])
-                            ->addIf(true, 'Create', 'http://hrp.test/create-general-deduction', ['icon' => 'fa fa-plus-circle']);;
-                    })
-                    ->add('Remuneration', '#', ['icon' => 'fas fa-money-bills'], function (Children $children) {
-                        $children
-                            ->addIf(true, 'Cash Paygrade', 'http://hrp.test/remuneration-cash-payment-list', ['icon' => 'fa fa-list'])
-                            ->addIf(true, 'Cash Remuneration', 'http://hrp.test/cash-remuneration-list', ['icon' => 'fa fa-list'])
-                            ->addIf(true, 'Bank Remuneration', 'http://hrp.test/bank-remuneration-list', ['icon' => 'fa fa-list']);
-                    })
-                    ->add('Incentive', '#', ['icon' => 'fas fa-money-bills'], function (Children $children) {
-                        $children
-                            ->addIf(true, 'List', 'http://hrp.test/incentive-list', ['icon' => 'fa fa-list'])
-                            ->addIf(true, 'Create', 'http://hrp.test/create-incentive', ['icon' => 'fa fa-plus-circle']);;
                     });
             })
             ->header('Reports', function (Nav $nav) {
@@ -112,11 +93,24 @@ class NavItemsGenerateTest extends TestCase
                             ->add('Bank Sheet', 'http://hrp.test/generate-bank-remuneration-sheet', ['icon' => 'fa fa-circle']);
                     });
             })
+            ->add('Remuneration', '#', ['icon' => 'fas fa-money-bills'], function (Children $children) {
+                $children
+                    ->addIf(true, 'Cash Paygrade', 'http://hrp.test/remuneration-cash-payment-list', ['icon' => 'fa fa-list'])
+                    ->addIf(true, 'Cash Remuneration', 'http://hrp.test/cash-remuneration-list', ['icon' => 'fa fa-list'])
+                    ->addIf(true, 'Bank Remuneration', 'http://hrp.test/bank-remuneration-list', ['icon' => 'fa fa-list']);
+            })
             ->render();
+        
+        $navbar = Navbar::navs($navitems);
 
-        //dd($nav);
+        $html = $navbar->render();
+        $script = $navbar->navActiveScript();
 
-        $this->assertIsArray($nav);
-        $this->assertEmpty($nav['nav-items'],'All nav items generated with header section');
+        //dd($nav, $navbar);
+        $this->assertStringContainsString('<nav class="mt-2">', $html);
+        $this->assertStringContainsString('<script type="text/javascript">', $script);
+        $this->assertIsArray($navitems);
+        $this->assertArrayHasKey('adminland', $navitems);
+        $this->assertNotEmpty($navitems['nav-items'], 'Some of the nav items doesn\'t have header');
     }
 }

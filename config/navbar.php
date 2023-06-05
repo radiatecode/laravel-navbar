@@ -1,6 +1,6 @@
 <?php
 
-use RadiateCode\LaravelNavbar\Presenter\NavBarPresenter;
+use RadiateCode\LaravelNavbar\Presenter\NavbarPresenter;
 
 return [
     /**
@@ -8,13 +8,13 @@ return [
      * 
      * [HTML presenter]
      */
-    'menu-presenter' => NavBarPresenter::class,
+    'nav-presenter' => NavbarPresenter::class,
 
     /**
-     * Cache the render navbar
+     * It will set active to requested/current nav
+     * 
+     * [Note: if you want to set nav active by front-end (Js/Jquery) 
+     * Or, if you cached your rendered nav, then you should disable it]
      */
-    'cache' => [
-        'enable' => true,
-        'ttl' => now()->addDay() // cache duration
-    ],
+    'enable-nav-active' => false
 ];
