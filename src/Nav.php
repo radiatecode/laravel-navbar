@@ -44,15 +44,16 @@ class Nav
         $navItems = $nav->render();
 
         // if no nav-items then why bother to create header in first place
-        if (empty($navItems['nav-items'])) {
+        if (empty($navItems)) {
             return $this;
         }
 
-        $this->navWithHeader[Str::slug($name)] = array_merge([
+        $this->nav[Str::slug($name)] = [
             'title' => $name,
             'attributes' => $attributes,
-            'type' => 'header'
-        ], $navItems);
+            'type' => 'header',
+            'nav-items' => $navItems
+        ];
 
         return $this;
     }
@@ -70,6 +71,8 @@ class Nav
     {
         $childrenItems = [];
 
+        $hasNoChildren = false;
+
         $isActive = false;
 
         // active a nav
@@ -84,16 +87,20 @@ class Nav
 
             $childrenItems = $childrenNav->render();
 
+            $hasNoChildren = empty($childrenItems);
+
             // active parent nav if any child nav is active
-            $isActive = $this->isChildrenActive($childrenItems['nav-items']);
+            $isActive = $this->isChildrenActive($childrenItems);
         }
 
         // if no children then why bother to create the nav
-        if (array_key_exists('nav-items', $childrenItems) && empty($childrenItems['nav-items'])) {
+        if ($hasNoChildren) {
             return $this;
         }
 
-        $this->nav[] = [
+        $navKey = Str::slug(strtolower($title));
+
+        $this->nav[$navKey] = [
             'title' => $title,
             'url' => $url,
             'attributes' => $attributes,
@@ -128,7 +135,7 @@ class Nav
 
     public function render()
     {
-        return array_merge($this->navWithHeader, ['nav-items' => $this->nav]);
+        return array_merge($this->navWithHeader, $this->nav);
     }
 
     protected function isChildrenActive($items)
@@ -137,7 +144,7 @@ class Nav
             return false;
         }
 
-        foreach ($items as $item) {
+        foreach ($items as $key => $item) {
             if ($item['is_active']) {
                 return true;
             }

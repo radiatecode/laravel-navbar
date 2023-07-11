@@ -6,10 +6,11 @@ This package generates navigation/navbar for laravel application. The package al
 # Sample & Usages
 ```php
 $navitems = Nav::make()
+    ->add('Home', route('home'), ['icon' => 'fa fa-home'])
     ->header('Adminland', function (Nav $nav) {
         $nav
-            ->addIf(hasPermission('role-list'), 'Roles', route('role-list'), ['icon' => 'fa fa-user-tag'])
-            ->addIf(hasPermission('system-user-list'), 'Users', route('system-user-list'), ['icon' => 'fa fa-users']);
+            ->add('Roles', route('role-list'), ['icon' => 'fa fa-user-tag'])
+            ->add('Users', route('system-user-list'), ['icon' => 'fa fa-users']);
     })
     ->header('Employee Management', function (Nav $nav) {
         $nav
@@ -43,9 +44,9 @@ class ViewServiceProvider extends ServiceProvider
     {
         View::composer('layouts.partials._left_nav',function(View $view){
             $navitems = Nav::make()
-                ->add('Roles', route('role-list'), ['icon' => 'fa fa-user-tag'])
+                ->addIf(condition: true, 'Roles', route('role-list'), ['icon' => 'fa fa-user-tag'])
                 ->add('Users', route('system-user-list'), ['icon' => 'fa fa-users'])
-                 ->add('Employee', '#', ['icon' => 'fa fa-user'], function (Children $children) {
+                ->add('Employee', '#', ['icon' => 'fa fa-user'], function (Children $children) {
                     $children
                         ->addif(condition: true, 'List', route('employee-list'), ['icon' => 'fa fa-list'])
                         ->addif(condition: false, 'Create', route('create-employee'), ['icon' => 'fa fa-plus-circle']);
@@ -182,12 +183,22 @@ $navitems = Nav::make()
 ```php
 // render() result sample
 [
+    "home" => [
+        "title" => "Home",
+        "url" => "http://hrp.test/",
+        "attributes" => [
+            "icon" => 'fa fa-home'
+        ],
+        "is_active" => false,
+        "type" => "menu",
+        "children" => [] // no children
+    ],
     "adminland" => [ // header
         "title" => "Adminland",
         "attributes" => [],
         "type" => "header",
         "nav-items" => [ // nav items under the adminland header
-            [
+            'roles' => [
                 "title" => "Roles",
                 "url" => "http://hrp.test/role-list",
                 "attributes" => [
@@ -197,7 +208,7 @@ $navitems = Nav::make()
                 "type" => "menu",
                 "children" => [] // no children
             ],
-            [
+            'user' => [
                 "title" => "User",
                 "url" => "http://hrp.test/system-user-list",
                 "attributes" => [
@@ -214,7 +225,7 @@ $navitems = Nav::make()
         "attributes" => [],
         "type" => "header", 
         "nav-items" => [ // nav items under the employee managment
-            [
+            'employee' => [
                 "title" => "Employee", // parent nav
                 "url" => "#",
                 "attributes" => [
@@ -223,33 +234,30 @@ $navitems = Nav::make()
                 "is_active" => false,
                 "type" => "menu",
                 "children" => [ // children nav items of employee nav
-                    "nav-items" => [
-                        [
-                            "title" => "List",
-                            "url" => "http://hrp.test/employee-list",
-                            "attributes" => [
-                                "icon" => 'fa fa-list'
-                            ],
-                            "is_active" => false,
-                            "type" => "menu",
-                            "children" => []
+                    'list' => [
+                        "title" => "List",
+                        "url" => "http://hrp.test/employee-list",
+                        "attributes" => [
+                            "icon" => 'fa fa-list'
                         ],
-                        [
-                            "title" => "Create",
-                            "url" => "http://hrp.test/create-employee",
-                            "attributes" => [
-                                "icon" => 'fa fa-plus-circle'
-                            ],
-                            "is_active" => false,
-                            "type" => "menu",
-                            "children" => []
-                        ]
+                        "is_active" => false,
+                        "type" => "menu",
+                        "children" => []
+                    ],
+                    'create' => [
+                        "title" => "Create",
+                        "url" => "http://hrp.test/create-employee",
+                        "attributes" => [
+                            "icon" => 'fa fa-plus-circle'
+                        ],
+                        "is_active" => false,
+                        "type" => "menu",
+                        "children" => []
                     ]
                 ]
             ]
         ]
     ],
-    "nav-items" => [] // nav items without header will be append here
 ]
 ```
 ## Navbar UI Builder

@@ -42,9 +42,9 @@ class NavbarPresenter implements Presenter
             ? '<i class="nav-header-icon ' . $attributes['icon'] . '"></i>'
             : '';
 
-        return '<li class="nav-header">' 
-        . ($icon) . $name
-        . '</li>';
+        return '<li class="nav-header">'
+            . ($icon) . $name
+            . '</li>';
     }
 
     /**
@@ -57,8 +57,11 @@ class NavbarPresenter implements Presenter
     protected function treeTag(array $navItem)
     {
         $treeNav = '';
+
         $navIcon = $this->navIcon($navItem);
+
         $active = $navItem['is_active'] ? 'active' : '';
+
         $menuOpen = $navItem['is_active'] ? 'menu-open' : 'has-treeview';
 
         $treeNav = PHP_EOL . '<li class="nav-item ' . $menuOpen . '">
@@ -71,7 +74,7 @@ class NavbarPresenter implements Presenter
                         </a>
                         <ul class="nav nav-treeview">';
 
-        $treeNav .= $this->nested($navItem['children']['nav-items']);
+        $treeNav .= $this->nested($navItem['children']);
 
         $treeNav .= '</ul></li>' . PHP_EOL;
 
@@ -88,6 +91,7 @@ class NavbarPresenter implements Presenter
     protected function soloTag(array $navItem)
     {
         $navIcon = $this->navIcon($navItem);
+
         $active = $navItem['is_active'] ? 'active' : '';
 
         return PHP_EOL . '<li class="nav-item">
@@ -133,10 +137,15 @@ class NavbarPresenter implements Presenter
         $nav = '';
 
         foreach ($this->navItems as $key => $item) {
-            if ($key != 'nav-items' && $item['type'] == 'header') {
+            if ($item['type'] === 'header') {
                 $nav .= $this->headerTag($item['title'], $item['attributes']);
 
                 $nav .= $this->nav($item['nav-items']);
+            }
+
+            // nav items without header
+            if ($item['type'] === 'menu') {
+                $nav .= $this->nav([$item]);
             }
         }
 
@@ -151,7 +160,7 @@ class NavbarPresenter implements Presenter
      */
     protected function isTreeNav(array $nav)
     {
-        return !empty($nav['children']) && !empty($nav['children']['nav-items']);
+        return !empty($nav['children']);
     }
 
     /**
