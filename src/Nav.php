@@ -10,8 +10,6 @@ class Nav
 {
     protected array $nav = [];
 
-    protected array $navWithHeader = [];
-
     protected string $header_key = '';
 
     protected $checkActive = false;
@@ -135,7 +133,7 @@ class Nav
 
     public function render()
     {
-        return array_merge($this->navWithHeader, $this->nav);
+        return $this->nav;
     }
 
     protected function isChildrenActive($items)
